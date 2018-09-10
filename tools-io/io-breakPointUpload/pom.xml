@@ -6,4 +6,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>io-breakPointUpload</artifactId>
+  
+ 
+  
+  <packaging>war</packaging>
 </project>

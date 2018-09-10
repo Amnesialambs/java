@@ -9,4 +9,8 @@
               
              -- webservice
               
+  
+1.@SpringBootApplication   启动过程中扫描包的范围？
+
+          
               
