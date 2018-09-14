@@ -11,7 +11,7 @@ public class FileUploadTest {
 		
 		String ip = "127.0.0.1";
 		Integer port = 10086;
-		String filePath = "F:\\repository.zip";
+		String filePath = "D:\\ITmFleetInfoFeedBackService.java";
 		try {
 			FileUpLoadClient client = new FileUpLoadClient(ip,port);
 			client.statusInfo();
