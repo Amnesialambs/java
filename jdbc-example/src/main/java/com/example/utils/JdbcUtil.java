@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JdbcUtil {
 
+	static Logger log = LoggerFactory.getLogger(JdbcUtil.class);
 	static String url = PropertiesUtil.getProperty("mysql.url");
 	static String user = PropertiesUtil.getProperty("mysql.username");
 	static String password = PropertiesUtil.getProperty("mysql.password");
@@ -30,9 +33,8 @@ public class JdbcUtil {
 			getStm();
 		} catch (ClassNotFoundException | SQLException e) {
 			rollBackTransaction();
-			e.printStackTrace();
-		}finally {
 			close();
+			e.printStackTrace();
 		}
 		
 	}
@@ -87,6 +89,7 @@ public class JdbcUtil {
 	 */
 	public static ResultSet getResult(String sql, List<Object> queryParam) throws SQLException {
 
+		log.info(parseSql(sql, queryParam));
 		rs = stm.executeQuery(parseSql(sql, queryParam));
 		commitTransaction();
 
@@ -100,11 +103,13 @@ public class JdbcUtil {
 	 * @param queryParam
 	 */
 	public static String parseSql(String sql, List<Object> queryParam) {
-		String[] sqlArr = sql.split("?");
+		String[] sqlArr = sql.split("[?]");
 
-		if (sqlArr.length > queryParam.size()) {
+		Integer sqlParam = com.example.utils.StringUtils.countCharOfString(sql,"?");
+		if(queryParam == null) queryParam = new ArrayList<Object>();
+		if (sqlParam > queryParam.size()) {
 			System.out.println("占位符数 > 传入参数");
-		} else if (sqlArr.length < queryParam.size()) {
+		} else if (sqlParam < queryParam.size()) {
 			System.out.println("占位符数 < 传入参数 ");
 		} else {
 			for (int i = 0; i < queryParam.size(); i++) {
@@ -129,7 +134,7 @@ public class JdbcUtil {
 
 		ResultSetMetaData rmd = rs.getMetaData();
 		int count = rmd.getColumnCount();// 字段总数
-		for (int i = 0; i < count; i++) {
+		for (int i = 1; i <= count; i++) {
 			columns.put(rmd.getColumnName(i), rmd.getColumnTypeName(i));
 		}
 
@@ -142,8 +147,10 @@ public class JdbcUtil {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static List<Map<String, Object>> findBySql(ResultSet rs) throws SQLException {
+	public static List<Map<String, Object>> findBySql(String sql,List<Object> queryParam) throws SQLException {
 
+		getResult(sql,queryParam);
+		
 		List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
 		Map<String, String> columns = parseColumns(rs);
 
@@ -212,10 +219,24 @@ public class JdbcUtil {
 
 		try {
 			if (!conn.getAutoCommit()) {
-				conn.commit();
+				conn.rollback();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		try {
+			List<Object> queryParam = new ArrayList<Object>();
+			queryParam.add("5064");
+			List<Map<String, Object>> list = JdbcUtil.findBySql("select * from tc_code where type = ? ",queryParam );
+			System.out.println(list);
+		} catch (SQLException e) {
+			rollBackTransaction();
+			e.printStackTrace();
+		}finally {
+			close();
 		}
 	}
 
