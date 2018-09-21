@@ -34,6 +34,19 @@ public class StringUtils {
 	}
 	
 	
+	/**
+	 * 
+	* @Title: checkNull  
+	* @Description: 校验是否为空  
+	* @param @param obj
+	* @param @return    参数  
+	* @return boolean    返回类型  
+	* @throws
+	 */
+	public boolean checkNull(Object obj) {
+		 
+		return (obj == null || obj.equals("") || obj.equals("null")) ? true : false;
+	}
 	
 	
 	
